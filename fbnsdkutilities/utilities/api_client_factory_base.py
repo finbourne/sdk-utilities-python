@@ -1,10 +1,10 @@
 import functools
 import inspect
 
-from finbournesdkutilities.utilities.api_client_builder import ApiClientBuilder
-from finbournesdkutilities.utilities.proxy_config import ProxyConfig
-from finbournesdkutilities.utilities.api_configuration import ApiConfiguration
-from finbournesdkutilities.utilities.retry import retry
+from fbnsdkutilities.utilities.api_client_builder import ApiClientBuilder
+from fbnsdkutilities.utilities.proxy_config import ProxyConfig
+from fbnsdkutilities.utilities.api_configuration import ApiConfiguration
+from fbnsdkutilities.utilities.retry import retry
 
 
 class ApiClientFactoryBase:

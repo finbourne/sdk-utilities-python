@@ -2,8 +2,8 @@ import json
 import os
 import logging
 
-from finbournesdkutilities.utilities.api_configuration import ApiConfiguration
-from finbournesdkutilities.utilities.proxy_config import ProxyConfig
+from fbnsdkutilities.utilities.api_configuration import ApiConfiguration
+from fbnsdkutilities.utilities.proxy_config import ProxyConfig
 
 
 class ApiConfigurationLoader:
