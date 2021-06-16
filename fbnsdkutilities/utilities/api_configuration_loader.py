@@ -17,7 +17,7 @@ class ApiConfigurationLoader:
         :param str api_secrets_filename: The full path to the JSON file containing the API credentials and optional proxy details
         :param module sdk: The SDK module to use
 
-        :return: lusid.utilities.ApiConfiguration: The populated ApiConfiguration
+        :return: fbnsdkutilities.utilities.ApiConfiguration: The populated ApiConfiguration
         """
         # Get the config keys which contain the mapping between the ApiConfiguration attributes and the variable names
         # in the secrets.json file and environment variables e.g. token_url is tokenUrl (secrets.json) and

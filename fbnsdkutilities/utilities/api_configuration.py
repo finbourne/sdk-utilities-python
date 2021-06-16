@@ -3,17 +3,17 @@ class ApiConfiguration:
     def __init__(self, token_url=None, api_url=None, username=None, password=None, client_id=None, client_secret=None,
                  app_name=None, certificate_filename=None, proxy_config=None):
         """
-        The configuration required to access LUSID, read more at https://support.finbourne.com/getting-started-with-apis-sdks
+        The configuration required to access the API, read more at https://support.finbourne.com/getting-started-with-apis-sdks
 
         :param str token_url: The token URL of the identity provider
-        :param str api_url: The API URL for the LUSID client
+        :param str api_url: The API URL for the service
         :param str username: The username to use
         :param str password: The password to use
         :param str client_id: The client id to use
         :param str client_secret: The client secret to use
-        :param str app_name: The name of the application calling LUSID
+        :param str app_name: The name of the application calling the API service
         :param str certificate_filename: Name of the certificate file (.pem, .cer or .crt)
-        :param lusid.utilities.ProxyConfig proxy_config: The proxy configuration to use
+        :param fbnsdkutilities.utilities.ProxyConfig proxy_config: The proxy configuration to use
         """
         self.__token_url = token_url
         self.__api_url = api_url

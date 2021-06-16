@@ -22,7 +22,7 @@ class ApiConfigurationLoaderTests(unittest.TestCase):
         """
         Not a test. This is used to test the values of the ApiConfiguration.
 
-        :param lusid.utilities.ApiConfiguration config: The ApiConfiguration to test the values of
+        :param fbnsdkutilities.utilities.ApiConfiguration config: The ApiConfiguration to test the values of
         :param dict secrets: A dictionary with the secrets using a common addressing scheme for both environment
         variables and secret file variables
 

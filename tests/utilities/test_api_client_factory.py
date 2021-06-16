@@ -5,9 +5,9 @@ from unittest.mock import patch
 from parameterized import parameterized
 from threading import Thread
 
-from lusid import InstrumentsApi, ResourceListOfInstrumentIdTypeDescriptor
 from fbnsdkutilities import ApiClientFactoryBase
 
+from tests.sdk.petstore.exceptions import ApiException
 from tests.sdk.petstore.api import StoreApi
 from tests.utilities import TokenUtilities as tu, CredentialsSource
 from tests.utilities.temp_file_manager import TempFileManager
@@ -45,10 +45,9 @@ class RefreshingToken(UserString):
 
 class ApiFactory(unittest.TestCase):
     def validate_api(self, api):
-        result = api.get_investory()
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, ResourceListOfInstrumentIdTypeDescriptor)
-        self.assertGreater(len(result.values), 0)
+        access_token = f"{api.api_client.configuration.access_token}"
+        self.assertIsNotNone(access_token)
+        self.assertIsInstance(access_token, str)
 
     @parameterized.expand([
         ["Unknown API", UnknownApi, "unknown api: UnknownApi"],
@@ -74,7 +73,7 @@ class ApiFactory(unittest.TestCase):
         )
         api = factory.build(StoreApi)
         self.assertIsInstance(api, StoreApi)
-        #self.validate_api(api)
+        self.validate_api(api)
 
     def test_get_api_with_none_token(self):
         factory = ApiClientFactoryBase(
@@ -86,7 +85,7 @@ class ApiFactory(unittest.TestCase):
         )
         api = factory.build(StoreApi)
         self.assertIsInstance(api, StoreApi)
-        #self.validate_api(api)
+        self.validate_api(api)
 
     def test_get_api_with_str_none_token(self):
         factory = ApiClientFactoryBase(
@@ -98,18 +97,18 @@ class ApiFactory(unittest.TestCase):
         )
         api = factory.build(StoreApi)
         self.assertIsInstance(api, StoreApi)
-        #self.validate_api(api)
+        self.validate_api(api)
 
     def test_get_api_with_token_url_as_env_var(self):
         token, refresh_token = tu.get_okta_tokens(CredentialsSource.secrets_path())
-        with patch.dict('os.environ', {"FBN_LUSID_API_URL": source_config_details["api_url"]}, clear=True):
+        with patch.dict('os.environ', {"FBN_SDK_API_URL": source_config_details["api_url"]}, clear=True):
             factory = ApiClientFactoryBase(
                 petstore,
                 token=token,
                 app_name=source_config_details["app_name"])
         api = factory.build(StoreApi)
         self.assertIsInstance(api, StoreApi)
-        #self.validate_api(api)
+        self.validate_api(api)
 
     def test_get_api_with_configuration(self):
         factory = ApiClientFactoryBase(
@@ -118,19 +117,7 @@ class ApiFactory(unittest.TestCase):
         )
         api = factory.build(StoreApi)
         self.assertIsInstance(api, StoreApi)
-       # self.validate_api(api)
-
-    def test_get_api_with_info(self):
-        factory = ApiClientFactoryBase(
-            petstore,
-            api_secrets_filename=CredentialsSource.secrets_path()
-        )
-        api = factory.build(StoreApi)
-
-        self.assertIsInstance(api, StoreApi)
-        #result = api.get_instrument_identifier_types(call_info=lambda r: print(r))
-
-        #self.assertIsNotNone(result)
+        self.validate_api(api)
 
     def test_get_info_with_invalid_param_throws_error(self):
         factory = ApiClientFactoryBase(
@@ -140,10 +127,10 @@ class ApiFactory(unittest.TestCase):
         api = factory.build(StoreApi)
         self.assertIsInstance(api, StoreApi)
 
-        #with self.assertRaises(ValueError) as error:
-        #    api.get_instrument_identifier_types(call_info="invalid param")
+        with self.assertRaises(ValueError) as error:
+            api.get_inventory(call_info="invalid param")
 
-        #self.assertEqual(error.exception.args[0], "call_info value must be a lambda")
+        self.assertEqual(error.exception.args[0], "call_info value must be a lambda")
 
     def test_wrapped_method(self):
         factory = ApiClientFactoryBase(
@@ -183,7 +170,7 @@ class ApiFactory(unittest.TestCase):
         # Close and thus delete the temporary file
         TempFileManager.delete_temp_file(secrets_file)
         api = factory.build(StoreApi)
-        #self.validate_api(api)
+        self.validate_api(api)
 
     def test_get_api_with_proxy_config(self):
 
@@ -212,7 +199,7 @@ class ApiFactory(unittest.TestCase):
         # Close and thus delete the temporary file
         TempFileManager.delete_temp_file(secrets_file)
         api = factory.build(StoreApi)
-        #self.validate_api(api)
+        self.validate_api(api)
 
     def test_get_api_with_correlation_id_from_env_var(self):
 
@@ -223,9 +210,9 @@ class ApiFactory(unittest.TestCase):
             factory = ApiClientFactoryBase(petstore)
             api = factory.build(StoreApi)
             self.assertIsInstance(api, StoreApi)
-            #self.validate_api(api)
-            #self.assertTrue("CorrelationId" in api.api_client.default_headers, msg="CorrelationId not found in headers")
-            #self.assertEquals(api.api_client.default_headers["CorrelationId"], "env-correlation-id")
+            self.validate_api(api)
+            self.assertTrue("CorrelationId" in api.api_client.default_headers, msg="CorrelationId not found in headers")
+            self.assertEquals(api.api_client.default_headers["CorrelationId"], "env-correlation-id")
 
     def test_get_api_with_correlation_id_from_param(self):
 
@@ -239,9 +226,9 @@ class ApiFactory(unittest.TestCase):
             )
             api = factory.build(StoreApi)
             self.assertIsInstance(api, StoreApi)
-            #self.validate_api(api)
-            #self.assertTrue("CorrelationId" in api.api_client.default_headers, msg="CorrelationId not found in headers")
-            #self.assertEquals(api.api_client.default_headers["CorrelationId"], "param-correlation-id")
+            self.validate_api(api)
+            self.assertTrue("CorrelationId" in api.api_client.default_headers, msg="CorrelationId not found in headers")
+            self.assertEquals(api.api_client.default_headers["CorrelationId"], "param-correlation-id")
 
     def test_use_apifactory_with_id_provider_response_handler(self):
         """
@@ -261,7 +248,7 @@ class ApiFactory(unittest.TestCase):
         )
 
         api = api_factory.build(StoreApi)
-        test = f"{api.api_client.configuration.access_token}"
+        self.validate_api(api)
 
         self.assertGreater(len(responses), 0)
 
@@ -277,13 +264,12 @@ class ApiFactory(unittest.TestCase):
             api_secrets_filename=CredentialsSource.secrets_path()
         )
 
-        def get_identifier_types(factory):
-            return f"{factory.build(StoreApi).api_client.configuration.access_token}"
-            #return factory.build(StoreApi).get_inventory()
+        def build_and_validate_api(factory):
+            return self.validate_api(factory.build(StoreApi))
 
-        thread1 = Thread(target=get_identifier_types, args=[api_factory])
-        thread2 = Thread(target=get_identifier_types, args=[api_factory])
-        thread3 = Thread(target=get_identifier_types, args=[api_factory])
+        thread1 = Thread(target=build_and_validate_api, args=[api_factory])
+        thread2 = Thread(target=build_and_validate_api, args=[api_factory])
+        thread3 = Thread(target=build_and_validate_api, args=[api_factory])
 
         with patch("requests.post") as identity_mock:
             identity_mock.side_effect = lambda *args, **kwargs: MockApiResponse(

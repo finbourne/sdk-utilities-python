@@ -38,7 +38,7 @@ class CredentialsSource:
             "password": os.getenv("FBN_PASSWORD", None),
             "client_id": os.getenv("FBN_CLIENT_ID", None),
             "client_secret": os.getenv("FBN_CLIENT_SECRET", None),
-            "api_url": os.getenv("FBN_LUSID_API_URL", None)
+            "api_url": os.getenv("FBN_SDK_API_URL", None)
         }
 
         # If there is a secrets file get the required variables from here too

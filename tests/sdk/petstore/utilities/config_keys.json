@@ -4,7 +4,7 @@
       "config": "tokenUrl"
   },
   "api_url": {
-      "env": "FBN_LUSID_API_URL",
+      "env": "FBN_SDK_API_URL",
       "config": "apiUrl"
   },
   "username": {
