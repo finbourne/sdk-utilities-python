@@ -1,6 +1,5 @@
 from fbnsdkutilities import ApiClientBuilder
-
-import lusid
+import tests.sdk.petstore as petstore
 
 
 class TokenUtilities:
@@ -17,7 +16,7 @@ class TokenUtilities:
             refresh_token = okta_json["refresh_token"]
             original_token = okta_json["access_token"]
 
-        client = ApiClientBuilder().build(lusid, secrets_path, extract_refresh_token)
+        client = ApiClientBuilder().build(petstore, secrets_path, extract_refresh_token)
         repr(client.configuration.access_token)
 
         return original_token, refresh_token

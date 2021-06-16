@@ -1,11 +1,10 @@
 import unittest
 
-import lusid.api
-import lusid
-from lusid import ApiException
 from fbnsdkutilities import ApiClientFactoryBase
 
-from utilities import CredentialsSource
+from tests.sdk.petstore.exceptions import ApiException
+import tests.sdk.petstore as petstore
+from tests.utilities import CredentialsSource
 
 
 class MockApi:
@@ -66,8 +65,8 @@ class RetryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # add mock to the module
-        lusid.api.MockApi = MockApi
-        cls.factory = ApiClientFactoryBase(lusid, api_secrets_filename=CredentialsSource.secrets_path())
+        petstore.api.MockApi = MockApi
+        cls.factory = ApiClientFactoryBase(petstore, api_secrets_filename=CredentialsSource.secrets_path())
 
     def test_non_retryable_is_not_retried(self):
         api = self.factory.build(MockApi)
@@ -78,7 +77,7 @@ class RetryTests(unittest.TestCase):
         self.assertEqual(ex.exception.status, 404)
         self.assertEqual(api.invocations, 1)
 
-    def test_retry_when_lusid_response_contains_retry_header(self):
+    def test_retry_when_sdk_response_contains_retry_header(self):
         api = self.factory.build(MockApi)
 
         api.execute_retryable_call()
@@ -128,7 +127,7 @@ class RetryTests(unittest.TestCase):
         api = self.factory.build(MockApi)
 
         with self.assertRaises(ApiException) as ex:
-            api.execute_failing_retryable("Portfolio", name="Portfolio", lusid_retries="ThisWontWork")
+            api.execute_failing_retryable("Portfolio", name="Portfolio", retries="ThisWontWork")
 
         self.assertEqual(ex.exception.status, 404)
         self.assertEqual(api.invocations, 3)

@@ -4,16 +4,17 @@ from time import sleep, time
 from threading import Thread
 from datetime import datetime, timedelta
 
-import lusid
 from fbnsdkutilities import ApiConfigurationLoader
 from fbnsdkutilities import ProxyConfig
 from fbnsdkutilities import RefreshingToken
 from parameterized import parameterized
 
-from utilities import CredentialsSource
+from tests.utilities import CredentialsSource
 from unittest.mock import patch
-from utilities.temp_file_manager import TempFileManager
-from utilities import MockApiResponse
+from tests.utilities.temp_file_manager import TempFileManager
+from tests.utilities import MockApiResponse
+import tests.sdk.petstore as petstore
+
 
 source_config_details, config_keys = CredentialsSource.fetch_credentials(), CredentialsSource.fetch_config_keys()
 
@@ -22,7 +23,7 @@ class TokenRefresh(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.config = ApiConfigurationLoader.load(lusid, CredentialsSource.secrets_path())
+        cls.config = ApiConfigurationLoader.load(petstore, CredentialsSource.secrets_path())
 
     def test_get_token(self):
 

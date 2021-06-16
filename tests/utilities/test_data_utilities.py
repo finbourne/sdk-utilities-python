@@ -7,7 +7,8 @@ import lusid
 import lusid.models as models
 from fbnsdkutilities import ApiClientBuilder
 
-from utilities import CredentialsSource
+from tests.utilities import CredentialsSource
+import tests.sdk.petstore as petstore
 
 import unittest
 
@@ -32,7 +33,7 @@ class TestDataUtilities:
         if not cls._api_client:
             with cls._lock:
                 if not cls._api_client:
-                    cls._api_client = ApiClientBuilder().build(lusid, CredentialsSource.secrets_path())
+                    cls._api_client = ApiClientBuilder().build(petstore, CredentialsSource.secrets_path())
         return cls._api_client
 
     def create_transaction_portfolio(self, scope):
