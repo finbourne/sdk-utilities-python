@@ -1,8 +1,10 @@
+import urllib3
 from urllib3 import make_headers
 import os
 
 from .api_configuration_loader import ApiConfigurationLoader
 from .refreshing_token import RefreshingToken
+from .. import TCPKeepAliveProxyManager, TCPKeepAlivePoolManager
 
 
 class ApiClientBuilder:
@@ -35,14 +37,15 @@ class ApiClientBuilder:
 
     @classmethod
     def build(cls, sdk, api_secrets_filename=None, id_provider_response_handler=None, api_configuration=None,
-              token=None, correlation_id=None):
+              token=None, correlation_id=None, tcp_keep_alive=False):
         """
+        :param sdk: The library that the ApiClient is for
         :param str api_secrets_filename: The full path to the JSON file containing the API credentials and optional proxy details
         :param typing.callable id_provider_response_handler: An optional function to handle the Okta response
         :param finbournesdkclient.utilities.ApiConfiguration api_configuration: A pre-populated ApiConfiguration
         :param str token: The pre-populated access token to use instead of asking Okta for a token
         :param str correlation_id: Correlation id for all calls made from the returned ApiClient instance, added as a header to each request
-        :param sdk: The library that the ApiClient is for
+        :param bool tcp_keep_alive: A flag that controls if the API client uses tcp keep-alive probes
 
         :return: finbournesdkclient.ApiClient: The configured finbournesdkclient ApiClient
         """
@@ -87,12 +90,34 @@ class ApiClientBuilder:
         config.ssl_ca_cert = configuration.certificate_filename
 
         # Set the proxy if needed
+        pool_manager_config = {
+            "tcp_keep_alive": tcp_keep_alive
+        }
         if configuration.proxy_config is not None:
-            config.proxy = configuration.proxy_config.address
+            pool_manager_config["proxy"] = configuration.proxy_config.address
             if configuration.proxy_config.username is not None and configuration.proxy_config.password is not None:
-                config.proxy_headers = make_headers(
+                pool_manager_config["proxy_headers"] = make_headers(
                     proxy_basic_auth=f"{configuration.proxy_config.username}:{configuration.proxy_config.password}"
                 )
+
+        if "proxy" in pool_manager_config:
+            if "tcp_keep_alive" in configuration:
+                config.pool_manager_fn = lambda kwargs: TCPKeepAliveProxyManager(
+                    proxy_url=pool_manager_config["proxy"],
+                    proxy_headers=pool_manager_config.get("proxy_headers"),
+                    **kwargs
+                )
+            else:
+                config.pool_manager_fn = lambda kwargs: urllib3.ProxyManager(
+                    proxy_url=pool_manager_config["proxy"],
+                    proxy_headers=pool_manager_config.get("proxy_headers"),
+                    **kwargs
+                )
+        else:
+            if "tcp_keep_alive" in configuration:
+                config.pool_manager_fn = lambda kwargs: TCPKeepAlivePoolManager(**kwargs)
+            else:
+                config.pool_manager_fn = lambda kwargs: urllib3.PoolManager(**kwargs)
 
         # Create and return the ApiClient
         api_client = sdk.ApiClient(configuration=config)
