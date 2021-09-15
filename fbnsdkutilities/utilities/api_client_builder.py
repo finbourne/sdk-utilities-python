@@ -95,8 +95,12 @@ class ApiClientBuilder:
         }
         if configuration.proxy_config is not None:
             pool_manager_config["proxy"] = configuration.proxy_config.address
+            config.proxy = configuration.proxy_config.address
             if configuration.proxy_config.username is not None and configuration.proxy_config.password is not None:
                 pool_manager_config["proxy_headers"] = make_headers(
+                    proxy_basic_auth=f"{configuration.proxy_config.username}:{configuration.proxy_config.password}"
+                )
+                config.proxy_headers = make_headers(
                     proxy_basic_auth=f"{configuration.proxy_config.username}:{configuration.proxy_config.password}"
                 )
 
@@ -107,17 +111,9 @@ class ApiClientBuilder:
                     proxy_headers=pool_manager_config.get("proxy_headers"),
                     **kwargs
                 )
-            else:
-                config.pool_manager_fn = lambda kwargs: urllib3.ProxyManager(
-                    proxy_url=pool_manager_config["proxy"],
-                    proxy_headers=pool_manager_config.get("proxy_headers"),
-                    **kwargs
-                )
         else:
             if "tcp_keep_alive" in configuration:
                 config.pool_manager_fn = lambda kwargs: TCPKeepAlivePoolManager(**kwargs)
-            else:
-                config.pool_manager_fn = lambda kwargs: urllib3.PoolManager(**kwargs)
 
         # Create and return the ApiClient
         api_client = sdk.ApiClient(configuration=config)
