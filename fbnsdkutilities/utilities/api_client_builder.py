@@ -1,10 +1,10 @@
-import urllib3
 from urllib3 import make_headers
 import os
 
 from fbnsdkutilities.utilities.api_configuration_loader import ApiConfigurationLoader
 from fbnsdkutilities.utilities.refreshing_token import RefreshingToken
-from fbnsdkutilities.tcp import TCPKeepAliveProxyManager, TCPKeepAlivePoolManager
+from fbnsdkutilities.tcp.tcp_keep_alive_probes import TCPKeepAliveProxyManager, TCPKeepAlivePoolManager
+
 
 
 class ApiClientBuilder:
@@ -105,19 +105,19 @@ class ApiClientBuilder:
                 )
 
         if "proxy" in pool_manager_config:
-            if "tcp_keep_alive" in configuration:
-                config.pool_manager_fn = lambda kwargs: TCPKeepAliveProxyManager(
+            if "tcp_keep_alive" in pool_manager_config:
+                config.pool_manager_fn = lambda **kwargs: TCPKeepAliveProxyManager(
                     proxy_url=pool_manager_config["proxy"],
                     proxy_headers=pool_manager_config.get("proxy_headers"),
-                    cert_file=configuration.cert_file,
-                    key_file=configuration.key_file,
+                    cert_file=config.cert_file,
+                    key_file=config.key_file,
                     **kwargs
                 )
         else:
-            if "tcp_keep_alive" in configuration:
-                config.pool_manager_fn = lambda kwargs: TCPKeepAlivePoolManager(
-                    cert_file=configuration.cert_file,
-                    key_file=configuration.key_file,
+            if "tcp_keep_alive" in pool_manager_config:
+                config.pool_manager_fn = lambda **kwargs: TCPKeepAlivePoolManager(
+                    cert_file=config.cert_file,
+                    key_file=config.key_file,
                     **kwargs
                 )
 
