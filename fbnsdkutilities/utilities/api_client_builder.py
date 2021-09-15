@@ -109,11 +109,17 @@ class ApiClientBuilder:
                 config.pool_manager_fn = lambda kwargs: TCPKeepAliveProxyManager(
                     proxy_url=pool_manager_config["proxy"],
                     proxy_headers=pool_manager_config.get("proxy_headers"),
+                    cert_file=configuration.cert_file,
+                    key_file=configuration.key_file,
                     **kwargs
                 )
         else:
             if "tcp_keep_alive" in configuration:
-                config.pool_manager_fn = lambda kwargs: TCPKeepAlivePoolManager(**kwargs)
+                config.pool_manager_fn = lambda kwargs: TCPKeepAlivePoolManager(
+                    cert_file=configuration.cert_file,
+                    key_file=configuration.key_file,
+                    **kwargs
+                )
 
         # Create and return the ApiClient
         api_client = sdk.ApiClient(configuration=config)
