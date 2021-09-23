@@ -2,9 +2,9 @@ import urllib3
 from urllib3 import make_headers
 import os
 
-from .api_configuration_loader import ApiConfigurationLoader
-from .refreshing_token import RefreshingToken
-from .. import TCPKeepAliveProxyManager, TCPKeepAlivePoolManager
+from fbnsdkutilities.utilities.api_configuration_loader import ApiConfigurationLoader
+from fbnsdkutilities.utilities.refreshing_token import RefreshingToken
+from fbnsdkutilities.tcp import TCPKeepAliveProxyManager, TCPKeepAlivePoolManager
 
 
 class ApiClientBuilder:
