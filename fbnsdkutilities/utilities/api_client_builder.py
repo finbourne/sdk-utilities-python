@@ -1,10 +1,10 @@
-import urllib3
 from urllib3 import make_headers
 import os
 
 from fbnsdkutilities.utilities.api_configuration_loader import ApiConfigurationLoader
 from fbnsdkutilities.utilities.refreshing_token import RefreshingToken
-from fbnsdkutilities.tcp import TCPKeepAliveProxyManager, TCPKeepAlivePoolManager
+from fbnsdkutilities.tcp.tcp_keep_alive_probes import TCPKeepAliveProxyManager, TCPKeepAlivePoolManager
+
 
 
 class ApiClientBuilder:
@@ -95,29 +95,31 @@ class ApiClientBuilder:
         }
         if configuration.proxy_config is not None:
             pool_manager_config["proxy"] = configuration.proxy_config.address
+            config.proxy = configuration.proxy_config.address
             if configuration.proxy_config.username is not None and configuration.proxy_config.password is not None:
                 pool_manager_config["proxy_headers"] = make_headers(
                     proxy_basic_auth=f"{configuration.proxy_config.username}:{configuration.proxy_config.password}"
                 )
+                config.proxy_headers = make_headers(
+                    proxy_basic_auth=f"{configuration.proxy_config.username}:{configuration.proxy_config.password}"
+                )
 
         if "proxy" in pool_manager_config:
-            if "tcp_keep_alive" in configuration:
-                config.pool_manager_fn = lambda kwargs: TCPKeepAliveProxyManager(
+            if "tcp_keep_alive" in pool_manager_config:
+                config.pool_manager_fn = lambda **kwargs: TCPKeepAliveProxyManager(
                     proxy_url=pool_manager_config["proxy"],
                     proxy_headers=pool_manager_config.get("proxy_headers"),
-                    **kwargs
-                )
-            else:
-                config.pool_manager_fn = lambda kwargs: urllib3.ProxyManager(
-                    proxy_url=pool_manager_config["proxy"],
-                    proxy_headers=pool_manager_config.get("proxy_headers"),
+                    cert_file=config.cert_file,
+                    key_file=config.key_file,
                     **kwargs
                 )
         else:
-            if "tcp_keep_alive" in configuration:
-                config.pool_manager_fn = lambda kwargs: TCPKeepAlivePoolManager(**kwargs)
-            else:
-                config.pool_manager_fn = lambda kwargs: urllib3.PoolManager(**kwargs)
+            if "tcp_keep_alive" in pool_manager_config:
+                config.pool_manager_fn = lambda **kwargs: TCPKeepAlivePoolManager(
+                    cert_file=config.cert_file,
+                    key_file=config.key_file,
+                    **kwargs
+                )
 
         # Create and return the ApiClient
         api_client = sdk.ApiClient(configuration=config)
