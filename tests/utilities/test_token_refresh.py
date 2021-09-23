@@ -581,6 +581,6 @@ class TokenRefresh(unittest.TestCase):
         result = dict((i, responses.count(i)) for i in responses)
 
         # Expect to see at least a single 429
-        self.assertGreaterEqual(result[429], 1)
+        self.assertGreaterEqual(result.get(429, 0), 1, f"Actual results: {result}")
         # And 5 200s eventually
-        self.assertEqual(result[200], 5)
+        self.assertEqual(result.get(200, 0), 5, f"Actual results: {result}")
