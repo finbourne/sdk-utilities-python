@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+import importlib
 
 from fbnsdkutilities.utilities.api_configuration import ApiConfiguration
 from fbnsdkutilities.utilities.proxy_config import ProxyConfig
@@ -22,6 +23,7 @@ class ApiConfigurationLoader:
         # Get the config keys which contain the mapping between the ApiConfiguration attributes and the variable names
         # in the secrets.json file and environment variables e.g. token_url is tokenUrl (secrets.json) and
         # FBN_TOKEN_URL (env variable)
+        importlib.import_module(f"{sdk.__name__}.utilities")
         config_keys = sdk.utilities.ConfigKeys.get()
 
         # The secrets file is a nested dictionary, set the names of the top level keys
