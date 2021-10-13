@@ -5,7 +5,7 @@ from unittest.mock import patch
 from parameterized import parameterized
 from threading import Thread
 
-from fbnsdkutilities import ApiClientFactoryBase
+from fbnsdkutilities import ApiClientFactory
 
 from tests.sdk.petstore.exceptions import ApiException
 from tests.sdk.petstore.api import StoreApi
@@ -54,7 +54,7 @@ class ApiFactory(unittest.TestCase):
         ["Unknown Implementation", UnknownImpl, "unknown api: UnknownImpl"]
     ])
     def test_get_unknown_api_throws_exception(self, _, api_to_build, error_message):
-        factory = ApiClientFactoryBase(
+        factory = ApiClientFactory(
             petstore,
             api_secrets_filename=CredentialsSource.secrets_path()
         )
@@ -65,7 +65,7 @@ class ApiFactory(unittest.TestCase):
 
     def test_get_api_with_token(self):
         token, refresh_token = tu.get_okta_tokens(CredentialsSource.secrets_path())
-        factory = ApiClientFactoryBase(
+        factory = ApiClientFactory(
             petstore,
             token=token,
             api_url=source_config_details["api_url"],
@@ -76,7 +76,7 @@ class ApiFactory(unittest.TestCase):
         self.validate_api(api)
 
     def test_get_api_with_none_token(self):
-        factory = ApiClientFactoryBase(
+        factory = ApiClientFactory(
             petstore,
             token=None,
             api_url=source_config_details["api_url"],
@@ -88,7 +88,7 @@ class ApiFactory(unittest.TestCase):
         self.validate_api(api)
 
     def test_get_api_with_str_none_token(self):
-        factory = ApiClientFactoryBase(
+        factory = ApiClientFactory(
             petstore,
             token=RefreshingToken(),
             api_url=source_config_details["api_url"],
@@ -102,7 +102,7 @@ class ApiFactory(unittest.TestCase):
     def test_get_api_with_token_url_as_env_var(self):
         token, refresh_token = tu.get_okta_tokens(CredentialsSource.secrets_path())
         with patch.dict('os.environ', {"FBN_SDK_API_URL": source_config_details["api_url"]}, clear=True):
-            factory = ApiClientFactoryBase(
+            factory = ApiClientFactory(
                 petstore,
                 token=token,
                 app_name=source_config_details["app_name"])
@@ -111,7 +111,7 @@ class ApiFactory(unittest.TestCase):
         self.validate_api(api)
 
     def test_get_api_with_configuration(self):
-        factory = ApiClientFactoryBase(
+        factory = ApiClientFactory(
             petstore,
             api_secrets_filename=CredentialsSource.secrets_path()
         )
@@ -120,7 +120,7 @@ class ApiFactory(unittest.TestCase):
         self.validate_api(api)
 
     def test_get_info_with_invalid_param_throws_error(self):
-        factory = ApiClientFactoryBase(
+        factory = ApiClientFactory(
             petstore,
             api_secrets_filename=CredentialsSource.secrets_path()
         )
@@ -133,7 +133,7 @@ class ApiFactory(unittest.TestCase):
         self.assertEqual(error.exception.args[0], "call_info value must be a lambda")
 
     def test_wrapped_method(self):
-        factory = ApiClientFactoryBase(
+        factory = ApiClientFactory(
             petstore,
             api_secrets_filename=CredentialsSource.secrets_path()
         )
@@ -165,7 +165,7 @@ class ApiFactory(unittest.TestCase):
 
         secrets_file = TempFileManager.create_temp_file(secrets)
         # Load the config
-        factory = ApiClientFactoryBase(
+        factory = ApiClientFactory(
             petstore, api_secrets_filename=secrets_file.name)
         # Close and thus delete the temporary file
         TempFileManager.delete_temp_file(secrets_file)
@@ -189,7 +189,7 @@ class ApiFactory(unittest.TestCase):
         secrets_file = TempFileManager.create_temp_file(secrets)
         # Load the config
         with patch.dict('os.environ', {}, clear=True):
-            factory = ApiClientFactoryBase(
+            factory = ApiClientFactory(
                 petstore,
                 api_secrets_filename=secrets_file.name,
                 proxy_url=source_config_details["proxy_address"],
@@ -207,7 +207,7 @@ class ApiFactory(unittest.TestCase):
         env_vars["FBN_CORRELATION_ID"] = "env-correlation-id"
 
         with patch.dict('os.environ', env_vars, clear=True):
-            factory = ApiClientFactoryBase(petstore)
+            factory = ApiClientFactory(petstore)
             api = factory.build(StoreApi)
             self.assertIsInstance(api, StoreApi)
             self.validate_api(api)
@@ -219,7 +219,7 @@ class ApiFactory(unittest.TestCase):
         env_vars = {config_keys[key]["env"]: value for key, value in source_config_details.items() if value is not None}
 
         with patch.dict('os.environ', env_vars, clear=True):
-            factory = ApiClientFactoryBase(
+            factory = ApiClientFactory(
                 petstore,
                 api_secrets_filename=CredentialsSource.secrets_path(),
                 correlation_id="param-correlation-id"
@@ -241,7 +241,7 @@ class ApiFactory(unittest.TestCase):
             nonlocal responses
             responses.append(id_provider_response.status_code)
 
-        api_factory = ApiClientFactoryBase(
+        api_factory = ApiClientFactory(
             petstore,
             api_secrets_filename=CredentialsSource.secrets_path(),
             id_provider_response_handler=record_response
@@ -254,12 +254,12 @@ class ApiFactory(unittest.TestCase):
 
     def test_use_apifactory_multiple_threads(self):
 
-        access_token = str(ApiClientFactoryBase(
+        access_token = str(ApiClientFactory(
             petstore,
             api_secrets_filename=CredentialsSource.secrets_path()
         ).api_client.configuration.access_token)
 
-        api_factory = ApiClientFactoryBase(
+        api_factory = ApiClientFactory(
             petstore,
             api_secrets_filename=CredentialsSource.secrets_path()
         )

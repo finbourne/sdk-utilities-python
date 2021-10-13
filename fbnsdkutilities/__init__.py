@@ -16,6 +16,7 @@ __version__ = "0.0.1"
 # import utilities into sdk package
 from fbnsdkutilities.utilities.api_client_builder import ApiClientBuilder
 from fbnsdkutilities.utilities.api_client_factory_base import ApiClientFactoryBase
+from fbnsdkutilities.utilities.api_client_factory import ApiClientFactory
 from fbnsdkutilities.utilities.api_configuration import ApiConfiguration
 from fbnsdkutilities.utilities.api_configuration_loader import ApiConfigurationLoader
 from fbnsdkutilities.utilities.proxy_config import ProxyConfig

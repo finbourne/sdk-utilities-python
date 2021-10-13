@@ -1,6 +1,6 @@
 import unittest
 
-from fbnsdkutilities import ApiClientFactoryBase
+from fbnsdkutilities import ApiClientFactory
 
 from tests.sdk.petstore.exceptions import ApiException
 import tests.sdk.petstore as petstore
@@ -66,7 +66,7 @@ class RetryTests(unittest.TestCase):
     def setUpClass(cls):
         # add mock to the module
         petstore.api.MockApi = MockApi
-        cls.factory = ApiClientFactoryBase(petstore, api_secrets_filename=CredentialsSource.secrets_path())
+        cls.factory = ApiClientFactory(petstore, api_secrets_filename=CredentialsSource.secrets_path())
 
     def test_non_retryable_is_not_retried(self):
         api = self.factory.build(MockApi)

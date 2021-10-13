@@ -1,8 +1,8 @@
-from fbnsdkutilities import ApiClientFactoryBase
+import fbnsdkutilities
 import tests.sdk.petstore as petstore
 
 
-class ApiClientFactory(ApiClientFactoryBase):
+class ApiClientFactory(fbnsdkutilities.ApiClientFactory):
     """
     The ApiClientFactory is responsible for providing the ability to create any of the PetStore APIs using the provided
     credentials. It will use the same ApiClient across all of the APIs.
