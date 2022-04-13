@@ -115,7 +115,7 @@ class RetryTests(unittest.TestCase):
 
         self.assertEqual(api.invocations, 3)
 
-    def test_retry_when_sdk_response_contains_retry_header(self):
+    def test_retry_when_sdk_response_contains_retry_header_as_str(self):
         api = self.factory.build(MockApi)
 
         api.execute_retryable_call_with_str()
