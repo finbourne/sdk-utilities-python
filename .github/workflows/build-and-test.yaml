@@ -2,13 +2,13 @@
 
 name: Build and test
 
-# Trigger the workflow on push or pull request to master or develop
+# Trigger the workflow on push or pull request to main
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   # This workflow contains a single job called "build"
@@ -32,8 +32,8 @@ jobs:
             exit 1
           fi
       
-      - name: Run tests on MASTER branch
-        if: ${{ github.base_ref == 'master' }}
+      - name: Run tests on MAIN branch
+        if: ${{ github.base_ref == 'main' }}
         env: 
           FBN_TOKEN_URL: ${{ secrets.MASTER_FBN_TOKEN_URL }}
           FBN_USERNAME: ${{ secrets.MASTER_FBN_USERNAME }}
@@ -44,7 +44,7 @@ jobs:
           FBN_APP_NAME: ${{ secrets.MASTER_FBN_CLIENT_ID }}
           FBN_LUSID_ACCESS_TOKEN: ${{ secrets.MASTER_FBN_ACCESS_TOKEN }}
         run: | 
-          echo "env variables for MASTER have been set"
+          echo "env variables for MAIN have been set"
           echo "Changing directory into sdk directory"
           cd sdk          
           echo "Running the tests..."

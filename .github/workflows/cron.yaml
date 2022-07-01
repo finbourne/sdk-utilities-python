@@ -16,8 +16,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Run tests on MASTER branch
-        if: ${{ github.ref == 'refs/heads/master'}}
+      - name: Run tests on MAIN branch
+        if: ${{ github.ref == 'refs/heads/main'}}
         env: 
           FBN_TOKEN_URL: ${{ secrets.MASTER_FBN_TOKEN_URL }}
           FBN_USERNAME: ${{ secrets.MASTER_FBN_USERNAME }}
@@ -28,7 +28,7 @@ jobs:
           FBN_APP_NAME: ${{ secrets.MASTER_FBN_CLIENT_ID }}
           FBN_LUSID_ACCESS_TOKEN: ${{ secrets.MASTER_FBN_ACCESS_TOKEN }}
         run: | 
-          echo "env variables for MASTER have been set"
+          echo "env variables for MAIN have been set"
           echo "Changing directory into sdk directory"
           cd sdk          
           echo "Running the tests..."
