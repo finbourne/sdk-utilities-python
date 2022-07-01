@@ -585,3 +585,47 @@ class TokenRefresh(unittest.TestCase):
         self.assertGreaterEqual(result.get(429, 0), 1, f"Actual results: {result}")
         # And 5 200s eventually
         self.assertEqual(result.get(200, 0), 5, f"Actual results: {result}")
+
+    def test_get_access_token_with_special_chars_in_credentials(self):
+        # create the problematic credentials
+        config = ApiConfigurationLoader.load(petstore, CredentialsSource.secrets_path())
+        config.password = "abcd:efg"
+        refreshing_token = RefreshingToken(api_configuration=config)
+
+        with patch("requests.post") as identity_mock:
+            identity_mock.side_effect = [
+                MockApiResponse(
+                    json_data={
+                        "access_token": "mock_access_token",
+                        "refresh_token": "mock_refresh_token",
+                        "expires_in": 60
+                    },
+                    status_code=200
+                )]
+            # Ensure that we were able to get the token
+            self.assertEqual(f"{refreshing_token}", "mock_access_token")
+
+    def test_get_access_token_with_path_chars_in_credentials(self):
+        # create the problematic credentials
+        config = ApiConfigurationLoader.load(petstore, CredentialsSource.secrets_path())
+        config.password = "some/random/url?key=value"
+        config.username = "test"
+        config.client_id = "test"
+        config.client_secret = "test"
+        refreshing_token = RefreshingToken(api_configuration=config)
+        with patch("requests.post") as identity_mock:
+            identity_mock.side_effect = [
+                MockApiResponse(
+                    json_data={
+                        "access_token": "mock_access_token",
+                        "refresh_token": "mock_refresh_token",
+                        "expires_in": 60
+                    },
+                    status_code=200
+                )]
+            self.assertEqual(f"{refreshing_token}", "mock_access_token")
+            expected_password_encoding = "some%2Frandom%2Furl%3Fkey%3Dvalue"
+            expected_request_body = f"grant_type=password&username=test" \
+                                    f"&password={expected_password_encoding}&scope=openid client groups offline_access" \
+                                    f"&client_id=test&client_secret=test"
+            self.assertEqual(identity_mock.call_args[1]["data"], expected_request_body)
