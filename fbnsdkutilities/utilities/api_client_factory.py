@@ -28,6 +28,7 @@ class ApiClientFactory:
         :param str proxy_username: The username for the proxy to use
         :param str proxy_password: The password for the proxy to use
         :param str correlation_id: Correlation id for all calls made from the returned finbournesdkclient API instances
+        :param bool tcp_keep_alive: A flag for controlling if the API client uses TCP keep-alive probes
         """
 
         self.sdk = sdk
@@ -58,6 +59,8 @@ class ApiClientFactory:
 
         # add the id provider response handler if specified
         builder_kwargs["id_provider_response_handler"] = kwargs.get("id_provider_response_handler", None)
+
+        builder_kwargs["tcp_keep_alive"] = kwargs.get("tcp_keep_alive", False)
 
         # Call the client builder, this will result in using either a token, secrets file or environment variables
         self.api_client = ApiClientBuilder.build(self.sdk, **builder_kwargs)

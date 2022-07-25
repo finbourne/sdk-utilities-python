@@ -23,6 +23,7 @@ class UnknownImpl:
 
 
 source_config_details, config_keys = CredentialsSource.fetch_credentials(), CredentialsSource.fetch_config_keys()
+pat_token = CredentialsSource.fetch_pat()
 
 
 class RefreshingToken(UserString):
@@ -44,6 +45,12 @@ class RefreshingToken(UserString):
 
 
 class ApiFactory(unittest.TestCase):
+
+    def get_env_vars_without_pat(self):
+        env_vars = {config_keys[key]["env"]: value for key, value in source_config_details.items() if value is not None}
+        env_vars_without_pat = {k: env_vars[k] for k in env_vars if k != "FBN_SDK_ACCESS_TOKEN"}
+        return env_vars_without_pat
+
     def validate_api(self, api):
         access_token = f"{api.api_client.configuration.access_token}"
         self.assertIsNotNone(access_token)
@@ -63,6 +70,7 @@ class ApiFactory(unittest.TestCase):
             factory.build(api_to_build)
         self.assertEqual(error.exception.args[0], error_message)
 
+    @unittest.skipIf(CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
     def test_get_api_with_token(self):
         token, refresh_token = tu.get_okta_tokens(CredentialsSource.secrets_path())
         factory = ApiClientFactory(
@@ -75,6 +83,7 @@ class ApiFactory(unittest.TestCase):
         self.assertIsInstance(api, StoreApi)
         self.validate_api(api)
 
+    @unittest.skipIf(CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
     def test_get_api_with_none_token(self):
         factory = ApiClientFactory(
             petstore,
@@ -87,6 +96,7 @@ class ApiFactory(unittest.TestCase):
         self.assertIsInstance(api, StoreApi)
         self.validate_api(api)
 
+    @unittest.skipIf(CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
     def test_get_api_with_str_none_token(self):
         factory = ApiClientFactory(
             petstore,
@@ -99,6 +109,7 @@ class ApiFactory(unittest.TestCase):
         self.assertIsInstance(api, StoreApi)
         self.validate_api(api)
 
+    @unittest.skipIf(not CredentialsSource.fetch_credentials().__contains__("app_name"), "do not run on PR's")
     def test_get_api_with_token_url_as_env_var(self):
         token, refresh_token = tu.get_okta_tokens(CredentialsSource.secrets_path())
         with patch.dict('os.environ', {"FBN_SDK_API_URL": source_config_details["api_url"]}, clear=True):
@@ -230,64 +241,64 @@ class ApiFactory(unittest.TestCase):
             self.assertTrue("CorrelationId" in api.api_client.default_headers, msg="CorrelationId not found in headers")
             self.assertEquals(api.api_client.default_headers["CorrelationId"], "param-correlation-id")
 
+    @unittest.skipIf(CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
     def test_use_apifactory_with_id_provider_response_handler(self):
         """
         Ensures that an id_provider_response handler that is passed to the ApiClientFactory can be used during
         communication with the id provider (if appropriate).
         """
-        responses = []
+        with patch.dict('os.environ', self.get_env_vars_without_pat(), clear=True):
+            responses = []
 
-        def record_response(id_provider_response):
-            nonlocal responses
-            responses.append(id_provider_response.status_code)
+            def record_response(id_provider_response):
+                nonlocal responses
+                responses.append(id_provider_response.status_code)
 
-        api_factory = ApiClientFactory(
-            petstore,
-            api_secrets_filename=CredentialsSource.secrets_path(),
-            id_provider_response_handler=record_response
-        )
-
-        api = api_factory.build(StoreApi)
-        self.validate_api(api)
-
-        self.assertGreater(len(responses), 0)
-
-    def test_use_apifactory_multiple_threads(self):
-
-        access_token = str(ApiClientFactory(
-            petstore,
-            api_secrets_filename=CredentialsSource.secrets_path()
-        ).api_client.configuration.access_token)
-
-        api_factory = ApiClientFactory(
-            petstore,
-            api_secrets_filename=CredentialsSource.secrets_path()
-        )
-
-        def build_and_validate_api(factory):
-            return self.validate_api(factory.build(StoreApi))
-
-        thread1 = Thread(target=build_and_validate_api, args=[api_factory])
-        thread2 = Thread(target=build_and_validate_api, args=[api_factory])
-        thread3 = Thread(target=build_and_validate_api, args=[api_factory])
-
-        with patch("requests.post") as identity_mock:
-            identity_mock.side_effect = lambda *args, **kwargs: MockApiResponse(
-                json_data={
-                    "access_token": f"{access_token}",
-                    "refresh_token": "mock_refresh_token",
-                    "expires_in": 3600
-                },
-                status_code=200
+            api_factory = ApiClientFactory(
+                petstore,
+                api_secrets_filename=CredentialsSource.secrets_path(),
+                id_provider_response_handler=record_response
             )
 
-            thread1.start()
-            thread2.start()
-            thread3.start()
+            api = api_factory.build(StoreApi)
+            self.validate_api(api)
 
-            thread1.join()
-            thread2.join()
-            thread3.join()
+            self.assertGreater(len(responses), 0)
+
+    @unittest.skipIf(CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
+    def test_use_apifactory_multiple_threads(self):
+
+        with patch.dict('os.environ', self.get_env_vars_without_pat(), clear=True):
+
+            api_factory = ApiClientFactory(
+                petstore,
+                api_secrets_filename=CredentialsSource.secrets_path()
+            )
+
+            def build_and_validate_api(factory):
+                return self.validate_api(factory.build(StoreApi))
+
+            thread1 = Thread(target=build_and_validate_api, args=[api_factory])
+            thread2 = Thread(target=build_and_validate_api, args=[api_factory])
+            thread3 = Thread(target=build_and_validate_api, args=[api_factory])
+
+            with patch("requests.post") as identity_mock:
+                identity_mock.side_effect = lambda *args, **kwargs: MockApiResponse(
+                    json_data={
+                        "access_token": "mock_access_token",
+                        "refresh_token": "mock_refresh_token",
+                        "expires_in": 3600
+                    },
+                    status_code=200
+                )
+
+                thread1.start()
+                thread2.start()
+                thread3.start()
+
+                thread1.join()
+                thread2.join()
+                thread3.join()
 
             # Ensure that we only got an access token once
             self.assertEqual(1, identity_mock.call_count)

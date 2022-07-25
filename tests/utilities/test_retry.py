@@ -97,7 +97,12 @@ class RetryTests(unittest.TestCase):
     def setUpClass(cls):
         # add mock to the module
         petstore.api.MockApi = MockApi
-        cls.factory = ApiClientFactory(petstore, api_secrets_filename=CredentialsSource.secrets_path())
+        token = CredentialsSource.fetch_pat()
+        if token is None:
+            cls.factory = ApiClientFactory(petstore, api_secrets_filename=CredentialsSource.secrets_path())
+        else: 
+            creds = CredentialsSource.fetch_credentials()
+            cls.factory = ApiClientFactory(petstore, token=creds["access_token"], api_url=creds["api_url"])
 
     def test_non_retryable_is_not_retried(self):
         api = self.factory.build(MockApi)
