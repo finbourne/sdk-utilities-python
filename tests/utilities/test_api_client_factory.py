@@ -48,7 +48,7 @@ class ApiFactory(unittest.TestCase):
 
     def get_env_vars_without_pat(self):
         env_vars = {config_keys[key]["env"]: value for key, value in source_config_details.items() if value is not None}
-        env_vars_without_pat = {k: env_vars[k] for k in env_vars if k != "FBN_SDK_ACCESS_TOKEN"}
+        env_vars_without_pat = {k: env_vars[k] for k in env_vars if k != "FBN_ACCESS_TOKEN"}
         return env_vars_without_pat
 
     def validate_api(self, api):
@@ -302,3 +302,13 @@ class ApiFactory(unittest.TestCase):
 
             # Ensure that we only got an access token once
             self.assertEqual(1, identity_mock.call_count)
+
+    @unittest.skipIf(not CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
+    def test_get_api_with_env_token_override(self):
+        factory = ApiClientFactory(
+            petstore,
+            api_secrets_filename=CredentialsSource.secrets_path(),
+        )
+        api = factory.build(StoreApi)
+        self.assertIsInstance(api, StoreApi)
+        self.validate_api(api)
