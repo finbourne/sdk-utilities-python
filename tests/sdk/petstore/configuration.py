@@ -52,7 +52,7 @@ class Configuration(six.with_metaclass(TypeWithDefault, object)):
 
     def __init__(self, host="http://localhost/api/v3",
                  api_key={}, api_key_prefix={},
-                 username="", password=""):
+                 username="", password="", tcp_keep_alive=False):
         """Constructor
         """
         self.host = host
@@ -136,6 +136,9 @@ class Configuration(six.with_metaclass(TypeWithDefault, object)):
         self.retries = None
         """Adding retries to override urllib3 default value 3
         """
+
+        # Set TCP keep alive <====== THIS HAS BEEN UPDATED MANUALLY...  If you regenerate this class in future, be sure to add
+        self.tcp_keep_alive = tcp_keep_alive
 
     @property
     def logger_file(self):

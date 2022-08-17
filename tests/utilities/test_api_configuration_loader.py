@@ -18,6 +18,7 @@ class ApiConfigurationLoaderTests(unittest.TestCase):
     These test ensure that the ApiConfigurationLoader works as expected
 
     """
+
     def assert_config_values(self, config, secrets):
         """
         Not a test. This is used to test the values of the ApiConfiguration.
@@ -48,15 +49,15 @@ class ApiConfigurationLoaderTests(unittest.TestCase):
         """
 
         secrets = {
-                "api": {
-                    config_keys[key]["config"]: value for key, value in source_config_details.items() if
-                    value is not None and "proxy" not in key
-                },
-                "proxy": {
-                    config_keys[key]["config"]: value for key, value in source_config_details.items() if
-                    value is not None and "proxy" in key
-                }
+            "api": {
+                config_keys[key]["config"]: value for key, value in source_config_details.items() if
+                value is not None and "proxy" not in key
+            },
+            "proxy": {
+                config_keys[key]["config"]: value for key, value in source_config_details.items() if
+                value is not None and "proxy" in key
             }
+        }
 
         env_vars = {config_keys[key]["env"]: "DUMMYVALUE" for key, value in source_config_details.items() if value is not None}
 
@@ -71,6 +72,7 @@ class ApiConfigurationLoaderTests(unittest.TestCase):
             # Ensure that the config is populated as expected
             self.assert_config_values(config, source_config_details)
 
+    @unittest.skipIf(CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
     def test_missing_env_vars_uses_config_file(self):
         """
         This tests loading the configuration details in multiple different ways
@@ -85,7 +87,7 @@ class ApiConfigurationLoaderTests(unittest.TestCase):
         }
 
         env_vars = {config_keys[key]["env"]: value for key, value in source_config_details.items() if
-         value is not None and "token_url" not in key}
+                    value is not None and "token_url" not in key}
 
         # Set the environment variables as desired
         with patch.dict('os.environ', env_vars, clear=True):
@@ -98,6 +100,7 @@ class ApiConfigurationLoaderTests(unittest.TestCase):
             # Ensure that the config is populated as expected
             self.assert_config_values(config, source_config_details)
 
+    @unittest.skipIf(CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
     def test_missing_config_file_vars_uses_env_vars(self):
         """
         This tests loading the configuration details in multiple different ways
@@ -129,6 +132,7 @@ class ApiConfigurationLoaderTests(unittest.TestCase):
             # Ensure that the config is populated as expected
             self.assert_config_values(config, source_config_details)
 
+    @unittest.skipIf(CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
     def test_load_from_config_file_only(self):
         """
         This tests loading the configuration details in multiple different ways
@@ -186,8 +190,8 @@ class ApiConfigurationLoaderTests(unittest.TestCase):
             ApiConfigurationLoader.load(petstore, non_existent_secrets_file)
 
         self.assertEqual(ex.exception.args[0], f"Provided secrets file of {non_existent_secrets_file} can not be found, please ensure you "
-                             f"have correctly specified the full path to the file or don't provide a secrets file to use "
-                             f"environment variables instead.")
+                                               f"have correctly specified the full path to the file or don't provide a secrets file to use "
+                                               f"environment variables instead.")
 
     def test_config_keys_aligned(self):
         """

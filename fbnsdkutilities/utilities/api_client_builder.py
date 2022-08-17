@@ -64,6 +64,11 @@ class ApiClientBuilder:
             # Check that there is an api_url available
             cls.__check_required_fields(configuration, ["api_url"])
             api_token = token
+        # If there is a token provided use it
+        elif configuration.access_token is not None:
+            # Check that there is an api_url available
+            cls.__check_required_fields(configuration, ["api_url"])
+            api_token = configuration.access_token
         # Otherwise generate an access token from Okta and use a RefreshingToken going forward
         else:
             # Check that all the required fields for generating a token exist
@@ -82,7 +87,7 @@ class ApiClientBuilder:
             )
 
         # Initialise the API client using the token so that it can be included in all future requests
-        config = sdk.Configuration()
+        config = sdk.Configuration(tcp_keep_alive=tcp_keep_alive)
         config.access_token = api_token
         config.host = configuration.api_url
 

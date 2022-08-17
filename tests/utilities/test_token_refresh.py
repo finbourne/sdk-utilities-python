@@ -1,5 +1,6 @@
 import os
 import unittest
+from math import floor, ceil
 from time import sleep, time
 from threading import Thread
 from datetime import datetime, timedelta
@@ -19,6 +20,7 @@ import tests.sdk.petstore as petstore
 source_config_details, config_keys = CredentialsSource.fetch_credentials(), CredentialsSource.fetch_config_keys()
 
 
+@unittest.skipIf(CredentialsSource.fetch_credentials().__contains__("access_token"), "do not run on PR's")
 class TokenRefresh(unittest.TestCase):
 
     @classmethod
@@ -375,7 +377,7 @@ class TokenRefresh(unittest.TestCase):
             self.assertEqual(f"{refreshing_token}", "mock_access_token")
             elapsed = time() - start
             # Ensure that the elapsed time is as expected
-            self.assertEqual(int(elapsed), expected_delay)
+            self.assertTrue(floor(elapsed) <= expected_delay <= ceil(elapsed))
 
     @parameterized.expand([
         ["Zero", 0],
@@ -418,7 +420,7 @@ class TokenRefresh(unittest.TestCase):
             self.assertEqual(f"{refreshing_token}", "mock_access_token")
             elapsed = time() - start
             # Ensure that the wait was for an appropriate amount of time
-            self.assertEqual(int(elapsed), seconds_delay)
+            self.assertTrue(floor(elapsed) <= seconds_delay <= ceil(elapsed))
 
     def test_retries_on_429s_uses_retry_after_header_with_http_date_in_future_if_exists(self):
         """
@@ -453,10 +455,8 @@ class TokenRefresh(unittest.TestCase):
             # Ensure that we were able to get the token, if not retrying this would be impossible
             self.assertEqual(f"{refreshing_token}", "mock_access_token")
             elapsed = time() - start
-            # Ensure that the wait was for an appropriate amount of time, because the seconds to wait are calculated
-            # here instead of being provided directly the delay could be a second less
-            self.assertGreaterEqual(int(elapsed), time_to_wait - 1)
-            self.assertLessEqual(int(elapsed), time_to_wait)
+            # Ensure that the wait was for an appropriate amount of time
+            self.assertTrue(floor(elapsed) <= time_to_wait <= ceil(elapsed))
 
     def test_retries_on_429s_uses_retry_after_header_with_http_date_in_past_if_exists(self):
         """
@@ -533,10 +533,8 @@ class TokenRefresh(unittest.TestCase):
             # Ensure that we were able to get the token, if not retrying this would be impossible
             self.assertEqual(f"{refreshing_token}", "mock_access_token")
             elapsed = time() - start
-            # Ensure that the wait was for an appropriate amount of time, because the seconds to wait are calculated
-            # here instead of being provided directly the delay could be a second less
-            self.assertGreaterEqual(int(elapsed), time_to_wait-1)
-            self.assertLessEqual(int(elapsed), time_to_wait)
+            # Ensure that the wait was for an appropriate amount of time
+            self.assertTrue(floor(elapsed) <= time_to_wait <= ceil(elapsed))
 
     @unittest.skip("Not valid test when using Okta caching proxy")
     def test_retries_against_id_provider_after_hitting_rate_limit(self):
