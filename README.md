@@ -12,7 +12,7 @@ This package provides a set of utilities for use with the suite of FINBOURNE Pyt
 
 ## Installation
 
-The SDK utilities package is available on PyPi and can be install using the following:
+The SDK utilities package is available on PyPi and can be installed using the following:
 
 ```
 pip install finbourne-sdk-utilities
@@ -44,7 +44,7 @@ mysdk/
 ...
 ```
 
-An implementation of `ConfigKeys.py` may look like the the example below where the keys are stored in a json file
+An implementation of `ConfigKeys.py` may look like the example below where the keys are stored in a json file
 
 ```python
 class ConfigKeys:
@@ -59,9 +59,9 @@ class ConfigKeys:
         return config_keys
 ```
 
-The returned values are a dictionary of configuration keys, containing a dictionary of key-values for environment variables and json configuration files e.g.
+The returned values are a dictionary of configuration keys, containing a dictionary of key-values for the environment variables and json configuration files e.g.
 
-```
+```json
 {
     ...
 
@@ -69,14 +69,14 @@ The returned values are a dictionary of configuration keys, containing a diction
         "env": "FBN_TOKEN_URL",
         "config": "tokenUrl"
     },
-    
+
     ...
 }
 ```
 
 ## Usage
 
-The SDK utilities can be used with FINBOURNE SDKs such as the [Luminesce Python SDK](https://github.com/finbourne/ e.g.luminesce-sdk-python-preview)
+The SDK utilities can be used with FINBOURNE SDKs such as the [Luminesce Python SDK](https://github.com/finbourne/)
 
 ```python
 import luminesce
