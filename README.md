@@ -1,6 +1,8 @@
+![LUSID_by_Finbourne](./resources/Finbourne_Logo_Teal.svg)
+
+
 # FINBOURNE<sup>®</sup> SDK Utilities
 
-![LUSID_by_Finbourne](https://content.finbourne.com/FINBOURNE_repo.png)
 
 [![Daily build](https://github.com/finbourne/sdk-utilities-python/actions/workflows/cron.yaml/badge.svg)](https://github.com/finbourne/sdk-utilities-python/actions/workflows/cron.yaml) [![Build and test](https://github.com/finbourne/sdk-utilities-python/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/finbourne/sdk-utilities-python/actions/workflows/build-and-test.yaml)
 
